@@ -2,6 +2,7 @@ import pandas
 from sklearn.linear_model import LinearRegression
 from sklearn.linear_model import Ridge
 from sklearn.metrics import mean_squared_error
+from sklearn.metrics import explained_variance_score
 from math import sqrt
 import csv
 class Dataset:
@@ -59,13 +60,13 @@ for datasetObject in ListOFDatasetObetcs:#got throgh dataset objects
 		print(datasetObject.numberOfInstance)
 		option = 1 #0 for double and 1 for mp by 5
 		while (numOFInstanceUsed <= datasetObject.numberOfInstance):
-	# 		# print(numOFInstanceUsed)
+            # print(numOFInstanceUsed)
 			train = dataset[:numOFInstanceUsed]
 			test = dataset[-3000:]
 			columns = datasetObject.getColums()
 			#print(columns)
 			#print(type(columns))
-	
+
 			#target=datasetObject.getTarget()
 			model.fit(train[columns],train[target])
 			prediction = model.predict(test[columns])
@@ -74,6 +75,7 @@ for datasetObject in ListOFDatasetObetcs:#got throgh dataset objects
 			#print(sqrt(((prediction-actualValue)**2).mean()))
 			actualValue = test[target]
 			rmse = sqrt(mean_squared_error(actualValue,prediction))
+            var = explained_variance_score(actualValue, prediction)
 			print(rmse)
 			#print(prediction[0])
 			#print(test.iloc[0][target])
