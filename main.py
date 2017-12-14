@@ -1,4 +1,5 @@
 import pandas
+from sklearn import linear_model
 from sklearn.linear_model import LinearRegression
 from sklearn.linear_model import Ridge
 from sklearn.metrics import mean_squared_error
@@ -29,7 +30,7 @@ class Dataset:
 ListOFDatasetObetcs = []
 ListOFDatasets = ["Datasets/winequality-red.csv"]
 ListOfAlgorithms = []
-ListOfAlgorithms.append(LinearRegression())
+ListOfAlgorithms.append(linear_model.Lasso(alpha=0.1))
 OutputList = []
 for datasetName in ListOFDatasets:
 	#calculate columns and target and and read dataset values
@@ -60,7 +61,7 @@ for datasetObject in ListOFDatasetObetcs:#got throgh dataset objects
 		print(datasetObject.numberOfInstance)
 		option = 1 #0 for double and 1 for mp by 5
 		while (numOFInstanceUsed <= datasetObject.numberOfInstance):
-            # print(numOFInstanceUsed)
+			# print(numOFInstanceUsed)
 			train = dataset[:numOFInstanceUsed]
 			test = dataset[-3000:]
 			columns = datasetObject.getColums()
@@ -75,7 +76,8 @@ for datasetObject in ListOFDatasetObetcs:#got throgh dataset objects
 			#print(sqrt(((prediction-actualValue)**2).mean()))
 			actualValue = test[target]
 			rmse = sqrt(mean_squared_error(actualValue,prediction))
-            var = explained_variance_score(actualValue, prediction)
+			var = explained_variance_score(actualValue, prediction)
+			print("var"+str(var))
 			print(rmse)
 			#print(prediction[0])
 			#print(test.iloc[0][target])
