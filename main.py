@@ -6,6 +6,7 @@ from sklearn.metrics import mean_squared_error
 from sklearn.metrics import explained_variance_score
 from sklearn.feature_selection import SelectKBest,f_classif
 from sklearn.feature_selection import f_regression
+from sklearn.model_selection import KFold
 
 from math import sqrt
 import csv
@@ -31,7 +32,7 @@ class Dataset:
 		return self.datsetValues
 
 ListOFDatasetObetcs = []
-ListOFDatasets = ["Datasets/winequality-red.csv"]
+ListOFDatasets = ["Datasets/winequality-red.csv","Datasets/winequality-white.csv"]
 ListOfAlgorithms = []
 ListOfAlgorithms.append(LinearRegression())
 OutputList = []
@@ -43,30 +44,39 @@ for datasetName in ListOFDatasets:
 		dataset = pandas.read_csv(datasetName,sep=';')
 		toalNumOfInstance = len(dataset.index)
 		columns = dataset.columns
-		columns = [c for c in columns if c not in ["alcohol","pH","suplphates","density","residual sugar"]]
+		#columns = [c for c in columns if c not in ["alcohol","pH","suplphates","density","residual sugar"]]
+		target = "quality"
+		datasetObject = Dataset(columns,target,dataset)
+		datasetObject.setNumOfInstace(toalNumOfInstance)
+		datasetObject.setDatasetName(datasetName)
+		ListOFDatasetObetcs.append(datasetObject)
+	if(datasetName == "Datasets/winequality-white.csv"):
+		dataset = pandas.read_csv(datasetName,sep=';')
+		toalNumOfInstance = len(dataset.index)
+		columns = dataset.columns
+		#columns = [c for c in columns if c not in ["alcohol","pH","suplphates","density","residual sugar"]]
 		target = "quality"
 		datasetObject = Dataset(columns,target,dataset)
 		datasetObject.setNumOfInstace(toalNumOfInstance)
 		datasetObject.setDatasetName(datasetName)
 		ListOFDatasetObetcs.append(datasetObject)
 
-
+kf = KFold(n_splits=10, shuffle = True)
 # print(ListOFDatasetObetcs[0].numberOfInstance)
 for datasetObject in ListOFDatasetObetcs:#got throgh dataset objects
 	print(datasetObject.getDatasetName())
 	for model in ListOfAlgorithms:
 		TmpList = []
-		TmpList.append(datasetObject.getDatasetName())
+		varList=[]
+		#TmpList.append(datasetObject.getDatasetName())
 		dataset = datasetObject.getDataset()
 		columns = datasetObject.getColums()
 		target = datasetObject.getTarget()
-		numOFInstanceUsed = 100
 		print(datasetObject.numberOfInstance)
-		option = 1 #0 for double and 1 for mp by 5
-		while (numOFInstanceUsed <= datasetObject.numberOfInstance):
+		for train_indices, test_indices in kf.split(dataset) :
 			# print(numOFInstanceUsed)
-			train = dataset[:numOFInstanceUsed]
-			test = dataset[-100:]
+			train = dataset.iloc[train_indices[:len(train_indices)]]
+			test =  dataset.iloc[test_indices[:len(test_indices)]]
 			columns = datasetObject.getColums()
 			#print(columns)
 			#print(type(columns))
@@ -79,7 +89,7 @@ for datasetObject in ListOFDatasetObetcs:#got throgh dataset objects
 			for i in range(len(columns)):
 				if(msk[i]==True):
 				   new_features.append(columns[i])
-			print(new_features)
+			#print(new_features)
 			#x_new = SelectKBest(score_func=f_classif, k=5).fit_transform(train[columns], train[target])
 			#mask =  x_new.get_support() #list of booleans
 			#new_features = [] # The list of your K best features
@@ -92,16 +102,13 @@ for datasetObject in ListOFDatasetObetcs:#got throgh dataset objects
 			actualValue = test[target]
 			rmse = sqrt(mean_squared_error(actualValue,prediction))
 			var = explained_variance_score(actualValue, prediction)
-			print("var="+str(var))
-			print(rmse)
+			varList.append(var)
 			#print(prediction[0])
 			#print(test.iloc[0][target])
 			TmpList.append(rmse)
-			if (option == 1):
-				numOFInstanceUsed = numOFInstanceUsed * 5
-				option = 0
-			else:
-				numOFInstanceUsed = numOFInstanceUsed * 2
-				option = 1
 		OutputList.append(TmpList)
-print(OutputList[0])
+		OutputList.append(varList)
+
+for i in range(int(len(OutputList)/int(2))):
+	print("maen of rmse is "+str(sum(OutputList[2*i])/len(OutputList[2*i])))
+	print("mean of var is "+str(sum(OutputList[2*i+1])/len(OutputList[2*i+1])))
