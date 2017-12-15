@@ -7,6 +7,7 @@ from sklearn.metrics import explained_variance_score
 from sklearn.feature_selection import SelectKBest,f_classif
 from sklearn.feature_selection import f_regression
 from sklearn.model_selection import KFold
+import matplotlib.pyplot as plt
 
 from math import sqrt
 import csv
@@ -34,8 +35,9 @@ class Dataset:
 ListOFDatasetObetcs = []
 ListOFDatasets = ["Datasets/winequality-red.csv","Datasets/winequality-white.csv"]
 ListOfAlgorithms = []
-ListOfAlgorithms.append(LinearRegression())
+ListOfAlgorithms.append(linear_model.Lasso(alpha=0.1))
 OutputList = []
+folds=list(range(1,11))
 for datasetName in ListOFDatasets:
 	#calculate columns and target and and read dataset values
 	#create an object of dataset using above calculated values.
@@ -73,6 +75,7 @@ for datasetObject in ListOFDatasetObetcs:#got throgh dataset objects
 		columns = datasetObject.getColums()
 		target = datasetObject.getTarget()
 		print(datasetObject.numberOfInstance)
+		
 		for train_indices, test_indices in kf.split(dataset) :
 			# print(numOFInstanceUsed)
 			train = dataset.iloc[train_indices[:len(train_indices)]]
@@ -112,3 +115,5 @@ for datasetObject in ListOFDatasetObetcs:#got throgh dataset objects
 for i in range(int(len(OutputList)/int(2))):
 	print("maen of rmse is "+str(sum(OutputList[2*i])/len(OutputList[2*i])))
 	print("mean of var is "+str(sum(OutputList[2*i+1])/len(OutputList[2*i+1])))
+	plt.plot(folds,OutputList[2*i])
+	plt.show()
